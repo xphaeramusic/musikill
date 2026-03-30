@@ -85,10 +85,20 @@ get_model('htdemucs')
 print("✅  Modelo htdemucs pronto!")
 PYEOF
 
-# ── 4. Node dependencies ──────────────────────────────────────────────────
+# ── 4. Node dependencies + copiar ffmpeg ─────────────────────────────────
 echo ""
 echo "📦  Instalando dependências Node.js..."
 npm install --quiet
+
+echo "📦  Copiando ffmpeg e ffprobe para resources/..."
+node -e "
+const fs = require('fs');
+fs.copyFileSync(require('ffmpeg-static'), 'resources/ffmpeg');
+fs.copyFileSync(require('@ffprobe-installer/ffprobe').path, 'resources/ffprobe');
+fs.chmodSync('resources/ffmpeg', 0o755);
+fs.chmodSync('resources/ffprobe', 0o755);
+console.log('ffmpeg e ffprobe copiados.');
+"
 
 # ── Concluído ─────────────────────────────────────────────────────────────
 echo ""

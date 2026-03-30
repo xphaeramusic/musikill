@@ -6,20 +6,22 @@ const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 
 // --- Paths ---
-// Em dev:       resources/ fica na raiz do projeto
-// Empacotado:   resources/ fica em process.resourcesPath (Contents/Resources/ no macOS)
+// Em dev: resources/ na raiz do projeto
+// Empacotado: process.resourcesPath (Contents/Resources/ no macOS)
 const isDev         = !app.isPackaged;
 const projectRoot   = path.join(__dirname, '..');
 const resourcesPath = isDev ? path.join(projectRoot, 'resources') : process.resourcesPath;
+const isWin         = os.platform() === 'win32';
+
+// ffmpeg/ffprobe: copiados para resources/ pelo setup.sh / setup.bat
+const ffmpegPath  = path.join(resourcesPath, isWin ? 'ffmpeg.exe'  : 'ffmpeg');
+const ffprobePath = path.join(resourcesPath, isWin ? 'ffprobe.exe' : 'ffprobe');
+
 // Python standalone — criado pelo setup.sh / setup.bat em resources/python/
-// Não depende de Python instalado no sistema.
-const isWin       = os.platform() === 'win32';
 const pythonDir   = path.join(resourcesPath, 'python');
 const pythonCmd   = isWin
     ? path.join(pythonDir, 'python.exe')
     : path.join(pythonDir, 'bin', 'python3');
-const ffmpegPath  = path.join(resourcesPath, isWin ? 'ffmpeg.exe'  : 'ffmpeg');
-const ffprobePath = path.join(resourcesPath, isWin ? 'ffprobe.exe' : 'ffprobe');
 const workDir     = path.join(app.getPath('userData'), 'musikill-work');
 fs.ensureDirSync(workDir);
 

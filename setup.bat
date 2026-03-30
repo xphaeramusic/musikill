@@ -96,11 +96,15 @@ if %errorlevel% neq 0 (
     pause & exit /b 1
 )
 
-:: ── 4. Node deps ─────────────────────────────────────────────────────────
+:: ── 4. Node deps + copiar ffmpeg ─────────────────────────────────────────
 echo.
 echo  [4/4] Instalando dependencias Node.js...
 npm install
 if %errorlevel% neq 0 ( echo [ERRO] npm install & pause & exit /b 1 )
+
+echo  Copiando ffmpeg e ffprobe para resources\...
+node -e "const fs=require('fs'); fs.copyFileSync(require('ffmpeg-static'), 'resources\\ffmpeg.exe'); fs.copyFileSync(require('@ffprobe-installer/ffprobe').path, 'resources\\ffprobe.exe'); console.log('[OK] ffmpeg.exe e ffprobe.exe copiados.');"
+if %errorlevel% neq 0 ( echo [ERRO] Falha ao copiar ffmpeg & pause & exit /b 1 )
 
 :: ── Concluido ─────────────────────────────────────────────────────────────
 echo.
