@@ -20,7 +20,25 @@
         <button class="tab-btn active" data-tab="converter">🔄 Conversor</button>
         <button class="tab-btn"        data-tab="separator">✂️ Separador</button>
     </div>
+    <button class="about-btn" id="about-btn" title="Sobre o Musikill">ℹ</button>
 </header>
+
+<!-- ─── Modal: Sobre ────────────────────────────────────────────────────── -->
+<div id="about-overlay" class="about-overlay" style="display:none">
+    <div class="about-modal">
+        <div class="about-logo">🎛️</div>
+        <div class="about-name">Musikill</div>
+        <div class="about-version">Versão 2.0</div>
+        <div class="about-divider"></div>
+        <div class="about-desc">Conversor de mídia e separador de voz/instrumental<br>com tecnologia Demucs — 100% local, sem nuvem.</div>
+        <div class="about-divider"></div>
+        <div class="about-author">Desenvolvido por</div>
+        <div class="about-author-name">Kayo Fernandes</div>
+        <a class="about-email" href="mailto:kfernandesmusica@gmail.com">kfernandesmusica@gmail.com</a>
+        <div class="about-copy">© 2026 Kayo Fernandes. Todos os direitos reservados.</div>
+        <button class="about-close" id="about-close">Fechar</button>
+    </div>
+</div>
 
 <!-- ─── Content ────────────────────────────────────────────────────────── -->
 <div class="content">
@@ -582,6 +600,18 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
+
+// ─── Sobre ────────────────────────────────────────────────────────────────
+const aboutOverlay = document.getElementById('about-overlay');
+document.getElementById('about-btn').addEventListener('click', () => {
+    aboutOverlay.style.display = 'flex';
+});
+document.getElementById('about-close').addEventListener('click', () => {
+    aboutOverlay.style.display = 'none';
+});
+aboutOverlay.addEventListener('click', e => {
+    if (e.target === aboutOverlay) aboutOverlay.style.display = 'none';
+});
 
 // ─── Window-level drag & drop prevention (files dropped outside zones) ────
 window.addEventListener('dragover',  e => e.preventDefault());

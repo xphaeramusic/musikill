@@ -335,3 +335,68 @@ audio {
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sep-item-step { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ─── About button ──────────────────────────────────────────────────────── */
+.about-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: none;
+    color: var(--text-muted);
+    font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    transition: var(--t);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-left: 10px;
+    -webkit-app-region: no-drag;
+}
+.about-btn:hover { color: var(--text); border-color: var(--accent); background: var(--accent-glow); }
+
+/* ─── About modal ───────────────────────────────────────────────────────── */
+.about-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+.about-modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 32px 28px;
+    width: 320px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    animation: modal-in 0.18s ease;
+}
+@keyframes modal-in {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+.about-logo     { font-size: 42px; margin-bottom: 4px; }
+.about-name     { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.about-version  { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.about-divider  { width: 40px; height: 1px; background: var(--border2); margin: 8px 0; }
+.about-desc     { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+.about-author   { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+.about-author-name { font-size: 16px; font-weight: 700; }
+.about-email {
+    font-size: 12px; color: var(--accent-h);
+    text-decoration: none; margin-top: 2px;
+}
+.about-email:hover { text-decoration: underline; }
+.about-copy     { font-size: 11px; color: var(--text-dim); margin-top: 10px; text-align: center; }
+.about-close {
+    margin-top: 18px;
+    padding: 8px 28px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 13px; cursor: pointer;
+    transition: var(--t);
+}
+.about-close:hover { color: var(--text); border-color: var(--accent); }
