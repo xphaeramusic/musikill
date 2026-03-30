@@ -1,0 +1,22 @@
+# Python — gerado pelo setup.sh / setup.bat
+venv/
+resources/python/
+
+# Modelo Demucs — baixado pelo setup (80 MB)
+resources/models/
+
+# Spleeter (versão antiga)
+resources/pretrained_models/
+
+# Electron / Node
+node_modules/
+dist/
+out/
+
+# Arquivos temporários de trabalho
+work/
+
+# macOS
+.DS_Store
+__pycache__/
+*.pyc

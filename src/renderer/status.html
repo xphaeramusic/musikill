@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Processando... - Musikill</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+           <div class="brand">
+               <div class="logo">🎛️</div>
+               <div class="brand-text">
+                   <h1 class="brand-title">Musikill</h1>
+                   <p class="brand-sub">Retire música (voz isolada) ou voz (instrumental) — local & simples.</p>
+               </div>
+           </div>
+           <nav class="header-actions">
+             <a class="ghost-link" href="index.html">Novo processamento</a>
+           </nav>
+       </div>
+   </header>
+    <main class="container main">
+        <section class="card">
+            <h2 class="card-title">Processando…</h2>
+            <p class="card-sub">Aguarde enquanto separamos os stems e geramos sua saída.</p>
+            <div id="procWrap" class="progress-wrap">
+                <div class="progress-head">
+                    <span id="procLabel">Iniciando…</span>
+                    <span id="procPct">0%</span>
+                </div>
+                <progress id="procBar" value="0" max="100"></progress>
+            </div>
+            <details id="logPanel" class="log-panel">
+                <summary>Ver log ao vivo</summary>
+                <pre id="logView" class="log-view" aria-live="polite"></pre>
+            </details>
+            <div id="errorBox" class="alert error hidden">
+                <strong>Ocorreu um erro.</strong>
+                <p id="errMsg"></p>
+            </div>
+        </section>
+    </main>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const jobId = urlParams.get('jobId');
+      
+      const procBar = document.getElementById('procBar');
+      const procPct = document.getElementById('procPct');
+      const procLabel = document.getElementById('procLabel');
+      const logView = document.getElementById('logView');
+      const errorBox = document.getElementById('errorBox');
+      const errMsg = document.getElementById('errMsg');
+
+      window.electronAPI.onUpdateProgress((data) => {
+          if (data.jobId !== jobId) return;
+          
+          procBar.value = data.progress;
+          procPct.textContent = `${data.progress}%`;
+
+          if (data.status === 'running' && data.step) {
+              const labels = {
+                  'verificando_arquivo': 'Verificando arquivo...',
+                  'extraindo_audio': 'Extraindo áudio…',
+                  'separando_stems': 'Separando stems (Spleeter)…',
+                  'remuxando_video': 'Combinando vídeo com novo áudio…',
+                  'finalizando_audio': 'Finalizando áudio…'
+              };
+              procLabel.textContent = labels[data.step] || 'Processando...';
+          }
+
+          if (data.status === 'done') {
+              const hasVideo = data.payload?.hasVideo || false;
+              // Redireciona para a página de resultado, passando o Job ID e se há vídeo
+              window.location.href = `result.html?jobId=${jobId}&hasVideo=${hasVideo}`;
+          }
+
+          if (data.status === 'error') {
+              errorBox.classList.remove('hidden');
+              errMsg.textContent = data.error || 'Erro desconhecido.';
+          }
+      });
+
+      window.electronAPI.onUpdateLog((chunk) => {
+          logView.textContent += chunk;
+          logView.scrollTop = logView.scrollHeight;
+      });
+    </script>
+</body>
+</html>

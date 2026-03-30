@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Resultado - Musikill</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header">
+         <div class="container header-inner">
+            <div class="brand">
+                <div class="logo">🎛️</div>
+                <div class="brand-text">
+                    <h1 class="brand-title">Musikill</h1>
+                    <p class="brand-sub">Retire música (voz isolada) ou voz (instrumental) — local & simples.</p>
+                </div>
+            </div>
+            <nav class="header-actions">
+              <a id="newProcessingBtnHeader" class="ghost-link" href="#">Novo processamento</a>
+           </nav>
+        </div>
+    </header>
+    <main class="container main">
+        <section class="card">
+            <div class="result-head">
+                <h2 class="card-title">Resultado</h2>
+                <span id="badge" class="badge"></span>
+            </div>
+
+            <div id="videoPlayerWrap" class="player hidden">
+                <video id="videoPlayer" controls preload="metadata"></video>
+            </div>
+            
+            <div id="audioPlayerWrap" class="player hidden">
+                <audio id="audioPlayer" controls preload="metadata"></audio>
+            </div>
+
+            <div class="actions">
+                <!-- MUDANÇA: Estes agora são botões, não links de download direto -->
+                <button id="downloadVideo" class="button hidden">⬇️ Baixar vídeo (MP4)</button>
+                <button id="downloadAudio" class="button alt">⬇️ Baixar só o áudio (WAV)</button>
+                <button id="newProcessingBtn" class="button ghost">➕ Novo processamento</button>
+            </div>
+        </section>
+    </main>
+<!-- src/renderer/result.html -->
+<!-- ... (toda a parte de <head> e <body> até o <script>) ... -->
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get('jobId');
+    const hasVideo = urlParams.get('hasVideo') === 'true';
+
+    async function loadResult() {
+        // ... (declaração de constantes para elementos do DOM) ...
+        const badge = document.getElementById('badge');
+        const videoPlayerWrap = document.getElementById('videoPlayerWrap');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const audioPlayerWrap = document.getElementById('audioPlayerWrap');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const downloadVideoBtn = document.getElementById('downloadVideo');
+        const downloadAudioBtn = document.getElementById('downloadAudio');
+        const newProcessingBtn = document.getElementById('newProcessingBtn');
+        const newProcessingBtnHeader = document.getElementById('newProcessingBtnHeader');
+
+        // MUDANÇA: Usando a nova função do preload
+        const audioRelativePath = await window.electronAPI.getFilePathForPlayer({ jobId, fileType: 'audio' });
+        if (audioRelativePath) {
+            // A URL agora é simples: app:// + caminho relativo (jobId/arquivo.ext)
+            audioPlayer.src = `app://${audioRelativePath.replace(/\\/g, '/')}`;
+        }
+
+        if (hasVideo) {
+            badge.textContent = 'Vídeo + Áudio';
+            videoPlayerWrap.classList.remove('hidden');
+            downloadVideoBtn.classList.remove('hidden');
+            
+            // MUDANÇA: Usando a nova função do preload
+            const videoRelativePath = await window.electronAPI.getFilePathForPlayer({ jobId, fileType: 'video' });
+            if (videoRelativePath) {
+                videoPlayer.src = `app://${videoRelativePath.replace(/\\/g, '/')}`;
+            }
+        } else {
+            badge.textContent = 'Apenas Áudio';
+            audioPlayerWrap.classList.remove('hidden');
+        }
+
+        downloadVideoBtn.addEventListener('click', () => { window.electronAPI.saveFile(jobId, 'video'); });
+        downloadAudioBtn.addEventListener('click', () => { window.electronAPI.saveFile(jobId, 'audio'); });
+        const cleanupAndGo = (event) => {
+            event.preventDefault();
+            window.electronAPI.cleanupAndNavigate();
+        };
+        newProcessingBtn.addEventListener('click', cleanupAndGo);
+        newProcessingBtnHeader.addEventListener('click', cleanupAndGo);
+    }
+    
+    loadResult();
+</script>
+<!-- ... (resto do arquivo) ... --></body>
+</html>

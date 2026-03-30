@@ -1,0 +1,73 @@
+{
+  "name": "musikill",
+  "version": "2.0.0",
+  "description": "Conversor de mídia e separador de voz/música — local & simples.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build": "electron-builder"
+  },
+  "keywords": ["demucs", "audio", "separation", "converter", "ffmpeg"],
+  "author": "Kayo Fernandes",
+  "license": "ISC",
+  "build": {
+    "appId": "com.kayofernandes.musikill",
+    "productName": "Musikill",
+    "copyright": "Kayo Fernandes",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/ffmpeg",
+        "to": "ffmpeg"
+      },
+      {
+        "from": "resources/ffprobe",
+        "to": "ffprobe"
+      },
+      {
+        "from": "resources/models",
+        "to": "models"
+      },
+      {
+        "from": "resources/python",
+        "to": "python"
+      }
+    ],
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "category": "public.app-category.music",
+      "icon": "resources/icon.icns"
+    },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "resources/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Audio"
+    },
+    "dmg": {
+      "title": "Musikill ${version}",
+      "background": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "resources/icon.ico",
+      "uninstallerIcon": "resources/icon.ico"
+    }
+  },
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "uuid": "^9.0.0"
+  }
+}

@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Musikill</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ─── Header ─────────────────────────────────────────────────────────── -->
+<header class="header">
+    <div class="header-logo">🎛️</div>
+    <div>
+        <div class="header-title">Musikill</div>
+        <div class="header-sub">Conversor &amp; Separador de Áudio/Vídeo</div>
+    </div>
+    <div class="header-spacer"></div>
+    <div class="header-tabs">
+        <button class="tab-btn active" data-tab="converter">🔄 Conversor</button>
+        <button class="tab-btn"        data-tab="separator">✂️ Separador</button>
+    </div>
+</header>
+
+<!-- ─── Content ────────────────────────────────────────────────────────── -->
+<div class="content">
+
+    <!-- ══════════════ TAB: CONVERSOR ══════════════ -->
+    <div id="tab-converter" class="tab-panel active">
+
+        <!-- Drop zone -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📁</span>
+                <span class="card-title">Arquivos</span>
+                <div class="card-header-right">
+                    <button class="btn btn-ghost btn-sm" id="conv-clear-btn">Limpar tudo</button>
+                    <button class="btn btn-secondary btn-sm" id="conv-add-btn">+ Adicionar</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="conv-dropzone" class="dropzone">
+                    <div class="dz-icon">⬆️</div>
+                    <div class="dz-title">Arraste arquivos aqui</div>
+                    <div class="dz-sub">Áudio ou vídeo • Múltiplos arquivos aceitos</div>
+                </div>
+                <div id="conv-file-list" class="file-list" style="margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">⚙️</span>
+                <span class="card-title">Configurações de conversão</span>
+            </div>
+            <div class="card-body">
+                <div class="controls-row">
+                    <div class="form-group">
+                        <label class="form-label">Formato de saída</label>
+                        <select id="conv-format">
+                            <optgroup label="── Áudio ──">
+                                <option value="mp3">MP3</option>
+                                <option value="aac">AAC</option>
+                                <option value="m4a">M4A</option>
+                                <option value="wav">WAV</option>
+                                <option value="flac">FLAC</option>
+                                <option value="ogg">OGG Vorbis</option>
+                                <option value="opus">Opus</option>
+                            </optgroup>
+                            <optgroup label="── Vídeo ──">
+                                <option value="mp4">MP4 (H.264)</option>
+                                <option value="mp4h265">MP4 (H.265)</option>
+                                <option value="mkv">MKV</option>
+                                <option value="mov">MOV</option>
+                                <option value="avi">AVI</option>
+                                <option value="webm">WebM</option>
+                                <option value="gif">GIF</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Qualidade</label>
+                        <select id="conv-quality">
+                            <option value="high" selected>Alta (maior arquivo)</option>
+                            <option value="medium">Média</option>
+                            <option value="low">Baixa (menor arquivo)</option>
+                        </select>
+                    </div>
+                    <div style="flex:1"></div>
+                    <button class="btn btn-primary" id="conv-start-btn">▶ Converter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="conv-results" style="display:none">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">✅</span>
+                    <span class="card-title">Resultados</span>
+                    <div class="card-header-right">
+                        <button class="btn btn-ghost btn-sm" id="conv-new-btn">Nova conversão</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="conv-results-list" class="file-list"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /tab-converter -->
+
+
+    <!-- ══════════════ TAB: SEPARADOR ══════════════ -->
+    <div id="tab-separator" class="tab-panel">
+
+        <!-- Drop zone + queue -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📁</span>
+                <span class="card-title">Arquivos para separar</span>
+                <div class="card-header-right">
+                    <button class="btn btn-ghost btn-sm" id="sep-clear-btn">Limpar</button>
+                    <button class="btn btn-secondary btn-sm" id="sep-add-btn">+ Adicionar</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="sep-dropzone" class="dropzone">
+                    <div class="dz-icon">✂️</div>
+                    <div class="dz-title">Arraste arquivos aqui</div>
+                    <div class="dz-sub">O Demucs separa voz e instrumental automaticamente</div>
+                </div>
+                <div id="sep-file-list" class="file-list" style="margin-top:10px"></div>
+                <div class="actions-bar" style="margin-top:10px">
+                    <span class="queue-info" id="sep-queue-info"></span>
+                    <div class="spacer"></div>
+                    <button class="btn btn-primary" id="sep-start-btn" disabled>▶ Separar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing / Results -->
+        <div id="sep-output"></div>
+
+    </div><!-- /tab-separator -->
+
+</div><!-- /content -->
+
+
+<script>
+'use strict';
+
+// ─── Utilities ─────────────────────────────────────────────────────────────
+
+function fmtSize(bytes) {
+    if (!bytes) return '';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function fileIcon(name) {
+    const ext = (name || '').split('.').pop().toLowerCase();
+    const video = ['mp4','mkv','mov','avi','webm','gif','m4v','flv','wmv','ts'];
+    const audio = ['mp3','wav','flac','aac','ogg','opus','m4a','wma','aiff'];
+    if (video.includes(ext)) return '🎬';
+    if (audio.includes(ext)) return '🎵';
+    return '📄';
+}
+
+function el(tag, cls, inner) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (inner !== undefined) e.innerHTML = inner;
+    return e;
+}
+
+function setupDropzone(dzEl, multi, onFiles) {
+    dzEl.addEventListener('dragover',  e => { e.preventDefault(); e.stopPropagation(); dzEl.classList.add('dragover'); });
+    dzEl.addEventListener('dragleave', e => { e.stopPropagation(); dzEl.classList.remove('dragover'); });
+    dzEl.addEventListener('drop', e => {
+        e.preventDefault(); e.stopPropagation();
+        dzEl.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files || []);
+        if (files.length) onFiles(files.map(f => ({ path: f.path, name: f.name, size: f.size })));
+    });
+    dzEl.addEventListener('click', async () => {
+        const result = await API.selectFiles({
+            filters: [{ name: 'Mídia', extensions: ['mp3','wav','flac','aac','ogg','opus','m4a','wma',
+                         'mp4','mkv','mov','avi','webm','gif','m4v','flv','wmv','ts','mts'] }],
+            multi,
+        });
+        if (result.length) onFiles(result);
+    });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONVERSOR
+// ═══════════════════════════════════════════════════════════════════════════
+
+let convFiles  = [];  // [{path,name,size}]
+let convJobs   = {};  // jobId → {name, status, progress, outputPath, outputName, outputSize, ext}
+let convActive = false;
+
+const convDropzone  = document.getElementById('conv-dropzone');
+const convFileList  = document.getElementById('conv-file-list');
+const convStartBtn  = document.getElementById('conv-start-btn');
+const convAddBtn    = document.getElementById('conv-add-btn');
+const convClearBtn  = document.getElementById('conv-clear-btn');
+const convResults   = document.getElementById('conv-results');
+const convResultList= document.getElementById('conv-results-list');
+const convNewBtn    = document.getElementById('conv-new-btn');
+const convFormat    = document.getElementById('conv-format');
+const convQuality   = document.getElementById('conv-quality');
+
+setupDropzone(convDropzone, true, files => addConvFiles(files));
+convAddBtn.addEventListener('click', async () => {
+    const files = await API.selectFiles({ multi: true });
+    if (files.length) addConvFiles(files);
+});
+convClearBtn.addEventListener('click', () => {
+    if (convActive) return;
+    convFiles = [];
+    renderConvFileList();
+});
+convNewBtn.addEventListener('click', () => {
+    convFiles = [];
+    convJobs  = {};
+    convActive = false;
+    convResults.style.display = 'none';
+    renderConvFileList();
+    convStartBtn.disabled = false;
+});
+
+function addConvFiles(files) {
+    const existing = new Set(convFiles.map(f => f.path));
+    files.forEach(f => { if (!existing.has(f.path)) convFiles.push(f); });
+    renderConvFileList();
+}
+
+function renderConvFileList() {
+    convFileList.innerHTML = '';
+    convStartBtn.disabled = convFiles.length === 0 || convActive;
+    if (!convFiles.length) return;
+    convFiles.forEach((f, idx) => {
+        const row = el('div', 'file-item');
+        row.innerHTML = `
+            <span class="file-icon">${fileIcon(f.name)}</span>
+            <div class="file-info">
+                <div class="file-name">${f.name}</div>
+                <div class="file-meta">${fmtSize(f.size)}</div>
+            </div>
+            <button class="remove-btn" data-idx="${idx}" title="Remover">✕</button>`;
+        convFileList.appendChild(row);
+    });
+    convFileList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            if (convActive) return;
+            convFiles.splice(parseInt(btn.dataset.idx), 1);
+            renderConvFileList();
+        });
+    });
+}
+
+convStartBtn.addEventListener('click', async () => {
+    if (!convFiles.length || convActive) return;
+    convActive = true;
+    convStartBtn.disabled = true;
+    convJobs = {};
+
+    const jobs = await API.startConversion({
+        files: convFiles,
+        format: convFormat.value,
+        quality: convQuality.value,
+    });
+
+    jobs.forEach(j => {
+        convJobs[j.jobId] = { name: j.name, status: 'queue', progress: 0 };
+    });
+
+    convResults.style.display = '';
+    renderConvResults();
+});
+
+API.onConverterProgress(data => {
+    if (!convJobs[data.jobId]) return;
+    Object.assign(convJobs[data.jobId], data);
+    renderConvResults();
+
+    const all = Object.values(convJobs);
+    if (all.length && all.every(j => j.status === 'done' || j.status === 'error')) {
+        convActive = false;
+    }
+});
+
+function renderConvResults() {
+    convResultList.innerHTML = '';
+    Object.entries(convJobs).forEach(([jobId, job]) => {
+        const row = el('div', 'file-item ' + (job.status === 'done' ? 'done' : job.status === 'error' ? 'error' : ''));
+        const progress = job.progress || 0;
+        let statusHtml = '';
+
+        if (job.status === 'running') {
+            statusHtml = `<div class="spinner"></div>`;
+        } else if (job.status === 'done') {
+            statusHtml = `
+                <span class="badge badge-done">Feito</span>
+                <button class="btn btn-success btn-sm" onclick="saveConvFile('${jobId}')">💾 Salvar</button>`;
+        } else if (job.status === 'error') {
+            statusHtml = `<span class="badge badge-error">Erro</span>`;
+        } else {
+            statusHtml = `<span class="badge badge-queue">Aguardando</span>`;
+        }
+
+        const progressBar = (job.status === 'running' || job.status === 'done' || job.status === 'error')
+            ? `<div class="progress-wrap"><div class="progress-fill ${job.status}" style="width:${progress}%"></div></div>`
+            : '';
+
+        const outputInfo = job.status === 'done'
+            ? `<span>→ ${job.outputName} (${fmtSize(job.outputSize)})</span>`
+            : '';
+
+        const errorInfo = job.status === 'error'
+            ? `<span style="color:var(--error);font-size:11px">${job.error || 'Erro desconhecido'}</span>`
+            : '';
+
+        row.innerHTML = `
+            <span class="file-icon">${fileIcon(job.name)}</span>
+            <div class="file-info">
+                <div class="file-name">${job.name}</div>
+                <div class="file-meta">${outputInfo}${errorInfo}</div>
+                ${progressBar}
+            </div>
+            <div class="file-status">${statusHtml}</div>`;
+        convResultList.appendChild(row);
+    });
+}
+
+async function saveConvFile(jobId) {
+    const job = convJobs[jobId];
+    if (!job || !job.outputPath) return;
+    const result = await API.saveFile({
+        sourcePath: job.outputPath,
+        defaultName: job.outputName,
+        ext: job.ext,
+    });
+    if (result.success) {
+        API.revealFile(result.path);
+    } else if (result.error) {
+        alert('Erro ao salvar: ' + result.error);
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEPARADOR
+// ═══════════════════════════════════════════════════════════════════════════
+
+let sepFiles  = [];  // [{path,name,size}]
+let sepJobs   = {};  // jobId → {name, status, progress, step, payload}
+let sepActive = false;
+
+const sepDropzone  = document.getElementById('sep-dropzone');
+const sepFileList  = document.getElementById('sep-file-list');
+const sepStartBtn  = document.getElementById('sep-start-btn');
+const sepAddBtn    = document.getElementById('sep-add-btn');
+const sepClearBtn  = document.getElementById('sep-clear-btn');
+const sepQueueInfo = document.getElementById('sep-queue-info');
+const sepOutput    = document.getElementById('sep-output');
+
+setupDropzone(sepDropzone, true, files => addSepFiles(files));
+sepAddBtn.addEventListener('click', async () => {
+    const files = await API.selectFiles({
+        filters: [{ name: 'Mídia', extensions: ['mp3','wav','flac','aac','ogg','opus','m4a',
+                     'mp4','mkv','mov','avi','webm','m4v','flv','wmv'] }],
+        multi: true,
+    });
+    if (files.length) addSepFiles(files);
+});
+sepClearBtn.addEventListener('click', () => {
+    if (sepActive) return;
+    sepFiles = [];
+    renderSepFileList();
+});
+
+function addSepFiles(files) {
+    const existing = new Set(sepFiles.map(f => f.path));
+    files.forEach(f => { if (!existing.has(f.path)) sepFiles.push(f); });
+    renderSepFileList();
+}
+
+function renderSepFileList() {
+    sepFileList.innerHTML = '';
+    sepStartBtn.disabled = sepFiles.length === 0 || sepActive;
+    sepQueueInfo.textContent = sepFiles.length ? `${sepFiles.length} arquivo${sepFiles.length > 1 ? 's' : ''} na fila` : '';
+
+    sepFiles.forEach((f, idx) => {
+        const row = el('div', 'file-item');
+        row.innerHTML = `
+            <span class="file-icon">${fileIcon(f.name)}</span>
+            <div class="file-info">
+                <div class="file-name">${f.name}</div>
+                <div class="file-meta">${fmtSize(f.size)}</div>
+            </div>
+            <button class="remove-btn" data-idx="${idx}" title="Remover">✕</button>`;
+        sepFileList.appendChild(row);
+    });
+    sepFileList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (sepActive) return;
+            sepFiles.splice(parseInt(btn.dataset.idx), 1);
+            renderSepFileList();
+        });
+    });
+}
+
+sepStartBtn.addEventListener('click', async () => {
+    if (!sepFiles.length || sepActive) return;
+    sepActive = true;
+    sepStartBtn.disabled = true;
+    sepJobs = {};
+    sepOutput.innerHTML = '';
+
+    const jobs = await API.startSeparation({ files: sepFiles });
+    jobs.forEach(j => {
+        sepJobs[j.jobId] = { name: j.name, status: 'running', progress: 0, step: 'Iniciando…' };
+        renderSepJobCard(j.jobId);
+    });
+});
+
+API.onSeparatorProgress(data => {
+    if (!sepJobs[data.jobId]) return;
+    Object.assign(sepJobs[data.jobId], data);
+    renderSepJobCard(data.jobId);
+
+    const all = Object.values(sepJobs);
+    if (all.length && all.every(j => j.status === 'done' || j.status === 'error')) {
+        sepActive = false;
+        // Keep files list but disable start
+        sepStartBtn.disabled = true;
+        sepQueueInfo.textContent = 'Processamento concluído';
+    }
+});
+
+function renderSepJobCard(jobId) {
+    const job = sepJobs[jobId];
+    const existingCard = document.getElementById('sep-card-' + jobId);
+
+    if (job.status === 'running') {
+        const cardHtml = `
+            <div class="result-block" id="sep-card-${jobId}">
+                <div class="result-header">
+                    <span>${fileIcon(job.name)}</span>
+                    <span>${job.name}</span>
+                    <div class="spinner" style="margin-left:auto"></div>
+                </div>
+                <div style="padding:14px 16px">
+                    <div class="sep-item-step" style="margin-bottom:8px">${job.step || 'Processando…'} — ${job.progress || 0}%</div>
+                    <div class="progress-wrap">
+                        <div class="progress-fill" style="width:${job.progress || 0}%"></div>
+                    </div>
+                </div>
+            </div>`;
+        if (existingCard) {
+            existingCard.outerHTML = cardHtml;
+        } else {
+            sepOutput.insertAdjacentHTML('beforeend', cardHtml);
+        }
+        return;
+    }
+
+    if (job.status === 'error') {
+        const cardHtml = `
+            <div class="result-block" id="sep-card-${jobId}">
+                <div class="result-header">
+                    <span>${fileIcon(job.name)}</span>
+                    <span>${job.name}</span>
+                    <span class="badge badge-error" style="margin-left:auto">Erro</span>
+                </div>
+                <div style="padding:14px 16px">
+                    <div class="info-box error">${job.error || 'Erro desconhecido durante a separação.'}</div>
+                </div>
+            </div>`;
+        if (existingCard) existingCard.outerHTML = cardHtml;
+        else sepOutput.insertAdjacentHTML('beforeend', cardHtml);
+        return;
+    }
+
+    if (job.status === 'done') {
+        const p = job.payload;
+        const videoButtons = p.hadVideo ? `
+            <button class="btn btn-secondary btn-sm" onclick="saveSepFile('${jobId}','videoVocalsPath','video_voz.mp4','mp4')">🎬 Salvar Vídeo</button>
+        ` : '';
+        const videoButtonsInstr = p.hadVideo ? `
+            <button class="btn btn-secondary btn-sm" onclick="saveSepFile('${jobId}','videoInstrPath','video_instrumental.mp4','mp4')">🎬 Salvar Vídeo</button>
+        ` : '';
+
+        const cardHtml = `
+            <div class="result-block" id="sep-card-${jobId}">
+                <div class="result-header">
+                    <span>${fileIcon(job.name)}</span>
+                    <span>${job.name}</span>
+                    <span class="badge badge-done" style="margin-left:auto">Concluído</span>
+                </div>
+                <div class="result-stems">
+                    <div class="stem-col">
+                        <div class="stem-label">
+                            <span class="stem-label-icon">🎤</span>
+                            <span>Voz (Vocals)</span>
+                        </div>
+                        <audio controls src="app://${p.vocalsUrl}"></audio>
+                        <div class="stem-actions">
+                            <button class="btn btn-success btn-sm" onclick="saveSepFile('${jobId}','vocalsPath','voz.wav','wav')">💾 Salvar Áudio</button>
+                            ${videoButtons}
+                        </div>
+                    </div>
+                    <div class="stem-col">
+                        <div class="stem-label">
+                            <span class="stem-label-icon">🎵</span>
+                            <span>Instrumental</span>
+                        </div>
+                        <audio controls src="app://${p.instrUrl}"></audio>
+                        <div class="stem-actions">
+                            <button class="btn btn-success btn-sm" onclick="saveSepFile('${jobId}','instrPath','instrumental.wav','wav')">💾 Salvar Áudio</button>
+                            ${videoButtonsInstr}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        if (existingCard) existingCard.outerHTML = cardHtml;
+        else sepOutput.insertAdjacentHTML('beforeend', cardHtml);
+    }
+}
+
+async function saveSepFile(jobId, payloadKey, defaultName, ext) {
+    const job = sepJobs[jobId];
+    if (!job || !job.payload) return;
+    const sourcePath = job.payload[payloadKey];
+    if (!sourcePath) return;
+    const result = await API.saveFile({ sourcePath, defaultName, ext });
+    if (result.success) {
+        API.revealFile(result.path);
+    } else if (result.error) {
+        alert('Erro ao salvar: ' + result.error);
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+
+// ─── Window-level drag & drop prevention (files dropped outside zones) ────
+window.addEventListener('dragover',  e => e.preventDefault());
+window.addEventListener('drop',      e => e.preventDefault());
+</script>
+</body>
+</html>
