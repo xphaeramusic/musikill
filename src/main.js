@@ -217,6 +217,30 @@ ipcMain.on('reveal-file', (event, filePath) => {
     if (filePath) shell.showItemInFolder(filePath);
 });
 
+ipcMain.handle('save-all-to-folder', async (event, files) => {
+    // files: [{sourcePath, outputName}]
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+        title: 'Escolher pasta de destino',
+        properties: ['openDirectory', 'createDirectory'],
+    });
+    if (canceled || !filePaths[0]) return { success: false };
+    const destDir = filePaths[0];
+    const results = [];
+    for (const f of files) {
+        if (!f.sourcePath || !fs.existsSync(f.sourcePath)) {
+            results.push({ name: f.outputName, ok: false });
+            continue;
+        }
+        try {
+            await fs.copyFile(f.sourcePath, path.join(destDir, f.outputName));
+            results.push({ name: f.outputName, ok: true });
+        } catch {
+            results.push({ name: f.outputName, ok: false });
+        }
+    }
+    return { success: true, destDir, results };
+});
+
 // --- Converter ---
 
 async function processConversion(file, format, quality, jobId, wc) {

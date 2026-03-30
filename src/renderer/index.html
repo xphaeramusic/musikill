@@ -100,6 +100,7 @@
                     <span class="card-icon">✅</span>
                     <span class="card-title">Resultados</span>
                     <div class="card-header-right">
+                        <button class="btn btn-success btn-sm" id="conv-save-all-btn">💾 Salvar Todos</button>
                         <button class="btn btn-ghost btn-sm" id="conv-new-btn">Nova conversão</button>
                     </div>
                 </div>
@@ -211,6 +212,7 @@ const convClearBtn  = document.getElementById('conv-clear-btn');
 const convResults   = document.getElementById('conv-results');
 const convResultList= document.getElementById('conv-results-list');
 const convNewBtn    = document.getElementById('conv-new-btn');
+const convSaveAllBtn= document.getElementById('conv-save-all-btn');
 const convFormat    = document.getElementById('conv-format');
 const convQuality   = document.getElementById('conv-quality');
 
@@ -224,6 +226,26 @@ convClearBtn.addEventListener('click', () => {
     convFiles = [];
     renderConvFileList();
 });
+convSaveAllBtn.addEventListener('click', async () => {
+    const done = Object.values(convJobs).filter(j => j.status === 'done' && j.outputPath);
+    if (!done.length) return;
+    convSaveAllBtn.disabled = true;
+    convSaveAllBtn.textContent = '⏳ Salvando…';
+    const files = done.map(j => ({ sourcePath: j.outputPath, outputName: j.outputName }));
+    const result = await API.saveAllToFolder(files);
+    convSaveAllBtn.disabled = false;
+    convSaveAllBtn.textContent = '💾 Salvar Todos';
+    if (result.success) {
+        const failed = result.results.filter(r => !r.ok).length;
+        if (failed === 0) {
+            alert(`✅ ${result.results.length} arquivo(s) salvos em:\n${result.destDir}`);
+        } else {
+            alert(`⚠️ ${result.results.length - failed} salvos, ${failed} com erro.\nPasta: ${result.destDir}`);
+        }
+        API.revealFile(result.destDir);
+    }
+});
+
 convNewBtn.addEventListener('click', () => {
     convFiles = [];
     convJobs  = {};

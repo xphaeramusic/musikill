@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('API', {
     selectFiles:     opts  => ipcRenderer.invoke('select-files', opts),
     selectDirectory: ()    => ipcRenderer.invoke('select-directory'),
     saveFile:        opts  => ipcRenderer.invoke('save-file', opts),
+    saveAllToFolder: files => ipcRenderer.invoke('save-all-to-folder', files),
     revealFile:      fpath => ipcRenderer.send('reveal-file', fpath),
 
     // Converter
