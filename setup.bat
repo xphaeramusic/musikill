@@ -68,15 +68,12 @@ echo  Atualizando pip...
 if %errorlevel% neq 0 ( echo [ERRO] pip upgrade & pause & exit /b 1 )
 
 echo  PyTorch CPU (~800 MB)...
-"%PYTHON_BIN%" -m pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu --quiet
+"%PYTHON_BIN%" -m pip install "torch==2.6.0" "torchaudio==2.6.0" --index-url https://download.pytorch.org/whl/cpu --quiet
 if %errorlevel% neq 0 ( echo [ERRO] torch & pause & exit /b 1 )
 
 echo  Demucs...
 "%PYTHON_BIN%" -m pip install demucs --quiet
 if %errorlevel% neq 0 ( echo [ERRO] demucs & pause & exit /b 1 )
-
-echo  torchcodec...
-"%PYTHON_BIN%" -m pip install torchcodec --quiet
 
 echo  certifi...
 "%PYTHON_BIN%" -m pip install certifi --quiet

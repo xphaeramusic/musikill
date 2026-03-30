@@ -16,12 +16,15 @@
     "converter",
     "ffmpeg"
   ],
-  "author": "Kayo Fernandes",
+  "author": {
+    "name": "Kayo Fernandes / Xphaera Music",
+    "email": "gestao@xphaeramusic.com.br"
+  },
   "license": "ISC",
   "build": {
     "appId": "com.kayofernandes.musikill",
     "productName": "Musikill",
-    "copyright": "Kayo Fernandes",
+    "copyright": "Copyright © 2026 Xphaera Music",
     "files": [
       "src/**/*",
       "resources/logo.svg",

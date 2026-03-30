@@ -177,6 +177,15 @@ function fmtSize(bytes) {
 
 // --- General IPC ---
 
+ipcMain.handle('app:info', () => {
+    const platform = { darwin: 'macOS', win32: 'Windows', linux: 'Linux' }[os.platform()] || os.platform();
+    return {
+        version:  app.getVersion(),
+        platform: `${platform} (${os.arch()})`,
+        userData: app.getPath('userData'),
+    };
+});
+
 ipcMain.handle('select-files', async (event, { filters, multi } = {}) => {
     const props = ['openFile'];
     if (multi !== false) props.push('multiSelections');

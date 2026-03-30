@@ -28,14 +28,19 @@
     <div class="about-modal">
         <img class="about-logo" src="../../resources/logo.svg" alt="Musikill">
         <div class="about-name">Musikill</div>
-        <div class="about-version">Versão 2.0</div>
-        <div class="about-divider"></div>
         <div class="about-desc">Conversor de mídia e separador de voz/instrumental<br>com tecnologia Demucs — 100% local, sem nuvem.</div>
         <div class="about-divider"></div>
-        <div class="about-author">Desenvolvido por</div>
-        <div class="about-author-name">Kayo Fernandes</div>
-        <a class="about-email" href="mailto:kfernandesmusica@gmail.com">kfernandesmusica@gmail.com</a>
-        <div class="about-copy">© 2026 Kayo Fernandes. Todos os direitos reservados.</div>
+        <table class="about-table">
+            <tr><td class="about-label">Produto</td><td class="about-value">Musikill</td></tr>
+            <tr><td class="about-label">Versão</td><td class="about-value" id="about-version">—</td></tr>
+            <tr><td class="about-label">Plataforma</td><td class="about-value" id="about-platform">—</td></tr>
+            <tr><td class="about-label">Desenvolvido por</td><td class="about-value">Kayo Fernandes / Xphaera Music</td></tr>
+            <tr><td class="about-label">Site</td><td class="about-value"><a class="about-link" href="https://xphaeramusic.com" target="_blank">xphaeramusic.com</a></td></tr>
+            <tr><td class="about-label">Suporte</td><td class="about-value"><a class="about-link" href="mailto:gestao@xphaeramusic.com.br">gestao@xphaeramusic.com.br</a></td></tr>
+            <tr><td class="about-label">Dados do app</td><td class="about-value about-userdata" id="about-userdata">—</td></tr>
+        </table>
+        <div class="about-divider"></div>
+        <div class="about-copy">Copyright © 2026 Xphaera Music. Todos os direitos reservados.</div>
         <button class="about-close" id="about-close">Fechar</button>
     </div>
 </div>
@@ -603,8 +608,18 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // ─── Sobre ────────────────────────────────────────────────────────────────
 const aboutOverlay = document.getElementById('about-overlay');
-document.getElementById('about-btn').addEventListener('click', () => {
+let aboutInfoLoaded = false;
+document.getElementById('about-btn').addEventListener('click', async () => {
     aboutOverlay.style.display = 'flex';
+    if (!aboutInfoLoaded) {
+        try {
+            const info = await API.getAppInfo();
+            document.getElementById('about-version').textContent  = `v${info.version}`;
+            document.getElementById('about-platform').textContent = info.platform;
+            document.getElementById('about-userdata').textContent = info.userData;
+            aboutInfoLoaded = true;
+        } catch {}
+    }
 });
 document.getElementById('about-close').addEventListener('click', () => {
     aboutOverlay.style.display = 'none';
