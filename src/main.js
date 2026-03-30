@@ -323,12 +323,20 @@ async function processSeparation(file, jobId, wc) {
                 '-m', 'demucs', '--two-stems=vocals', '-n', 'htdemucs', '-o', demucsOut, tempWav
             ], { env });
 
+            let stderrLog = '';
             proc.stderr.on('data', data => {
-                const m = data.toString().match(/(\d+)%\|/);
+                const text = data.toString();
+                stderrLog += text;
+                const m = text.match(/(\d+)%\|/);
                 if (m) send({ status: 'running', progress: 15 + Math.round(parseInt(m[1]) * 0.72), step: 'Separando stems com Demucs…' });
             });
             proc.stdout.on('data', () => {});
-            proc.on('close', code => code === 0 ? resolve() : reject(new Error(`Demucs saiu com código ${code}`)));
+            proc.on('close', code => {
+                if (code === 0) return resolve();
+                // Extrai a última linha relevante do log para mostrar ao usuário
+                const lastLine = stderrLog.trim().split('\n').filter(l => l.trim()).slice(-3).join(' | ');
+                reject(new Error(`Demucs falhou (código ${code}):\n${lastLine}`));
+            });
             proc.on('error', reject);
         });
 
