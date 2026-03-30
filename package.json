@@ -24,6 +24,7 @@
     "copyright": "Kayo Fernandes",
     "files": [
       "src/**/*",
+      "resources/logo.svg",
       "package.json",
       "node_modules/**/*"
     ],
@@ -38,6 +39,7 @@
       }
     ],
     "mac": {
+      "icon": "resources/icon.icns",
       "target": [
         {
           "target": "dmg",
@@ -47,6 +49,7 @@
       "category": "public.app-category.music"
     },
     "win": {
+      "icon": "resources/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -55,6 +58,7 @@
       ]
     },
     "linux": {
+      "icon": "resources/icon-1024.png",
       "target": "AppImage",
       "category": "Audio"
     },
